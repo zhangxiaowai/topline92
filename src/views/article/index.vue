@@ -166,7 +166,7 @@ export default {
       let searchData = {}
       for (var i in this.searchForm) {
         // i:代表对象的成员属性名称, status、channel_id、begin_pudate等等
-        if (this.searchForm[i]) {
+        if (this.searchForm[i] || this.searchForm[i] === 0) {
           // 成员值非空
           searchData[i] = this.searchForm[i]
         }
