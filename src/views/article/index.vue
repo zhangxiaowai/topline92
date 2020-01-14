@@ -14,15 +14,8 @@
           <el-radio v-model="searchForm.status" :label="3">审核失败</el-radio>
           <el-radio v-model="searchForm.status" :label="4">已删除</el-radio>
         </el-form-item>
-        <el-form-item label="频道列表：">
-          <el-select v-model="searchForm.channel_id" placeholder="请选择" clearable>
-            <el-option
-              v-for="item in channelList"
-              :key="item.id"
-              :label="item.name"
-              :value="item.id"
-            ></el-option>
-          </el-select>
+        <el-form-item label="频道列表："  prop="channel_id">
+           <Channel  @slt="selectHandler"></Channel>
         </el-form-item>
         <el-form-item label="时间选择：">
           <el-date-picker
@@ -66,8 +59,12 @@
         <el-table-column prop="pubdate" label="发布时间"></el-table-column>
         <!-- 修改和删除 -->
         <el-table-column label="操作">
-          <el-button type="primary" size="mini">修改</el-button>
-          <el-button type="danger" size="mini">删除</el-button>
+          <template slot-scope="stData">
+            <el-button type="primary" size="mini" @click="$router.push(`/articleedit/${stData.row.id}`)">修改</el-button>
+            <!-- 根据id进行删除 -->
+          <el-button type="danger" size="mini"  @click="del(stData.row.id)">删除</el-button>
+          </template>
+
         </el-table-column>
       </el-table>
       <el-pagination
@@ -84,6 +81,7 @@
 </template>
 
 <script>
+import Channel from '@/components/channel.vue'
 export default {
   name: 'Article',
   watch: {
@@ -110,11 +108,16 @@ export default {
       }
     }
   },
+  components: {
+    // 富文本编辑器的组件模块做注册
+
+    Channel
+  },
   data () {
     return {
       articleList: [], // 文章列表
       tot: 0, // 文章总条数
-      channelList: [],
+
       // 搜索表单数据对象
       timetotime: '',
       searchForm: {
@@ -127,13 +130,41 @@ export default {
       }
     }
   },
+
   created () {
     // 获得频道信息
-    this.getChannelList()
+
     // 获得文章列表信息
     this.getArticleList()
   },
   methods: {
+
+    // 删除有关操作
+    del (id) {
+      // 确认事情
+      this.$confirm('确认要删除该文章么?', '删除', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        // axios请求服务器端实现删除
+        let pro = this.$http({
+          url: '/mp/v1_0/articles/' + id,
+          method: 'delete'
+        })
+        pro
+          .then(result => {
+            // 删除成功
+            // console.log(result)  // 返回空的data数据
+            // 直接页面刷新即可
+            this.getArticleList()
+          })
+          .catch(err => {
+            return this.$message.error('删除文章失败：' + err)
+          })
+      }).catch(() => {
+      })
+    },
     // 分页相关功能
     handleSizeChange (val) {
       this.searchForm.per_page = val
@@ -144,22 +175,8 @@ export default {
     },
 
     // 获得真实频道列表数据
-    getChannelList () {
-      let pro = this.$http({
-        url: '/mp/v1_0/channels',
-        method: 'get',
-        params: this.searchForm
-      })
-      pro
-        .then(result => {
-          // console.log(result)
-          // data接收频道数据
-
-          this.channelList = result.data.data.channels
-        })
-        .catch(err => {
-          return this.$message.error('获得频道失败：' + err)
-        })
+    selectHandler (val) {
+      this.searchForm.channel_id = val
     },
     // 获取密钥信息
     getArticleList () {
@@ -176,7 +193,6 @@ export default {
         params: searchData,
 
         method: 'get'
-
       })
       pro
         .then(result => {
@@ -198,7 +214,7 @@ export default {
 .box-card {
   margin-bottom: 15px;
 }
-.el-pagination{
-  margin-top:15px;
+.el-pagination {
+  margin-top: 15px;
 }
 </style>

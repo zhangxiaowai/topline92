@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import axios from 'axios'
 import router from '@/router'
+import JSONbig from 'json-bigint'
 axios.defaults.baseURL = 'http://ttapi.research.itcast.cn/'
 Vue.prototype.$http = axios
 // 配置请求拦截器
@@ -41,3 +42,14 @@ axios.interceptors.response.use(function (response) {
   // })
   return Promise.reject(error)
 })
+// 真实信息id转换
+axios.defaults.transformResponse = [function (data) {
+  // data的返回形式有两种
+  // 1. 实体字符串
+  // 2. 空字符串(不能转的)
+  // JSONbig.parse针对大整型进行处理，其他信息不给处理
+  if (data) {
+    return JSONbig.parse(data)
+  }
+  return data
+}]

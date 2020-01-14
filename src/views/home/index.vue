@@ -19,16 +19,16 @@
           <i class="el-icon-menu"></i>
           <span>内容管理</span>
         </template>
-        <el-menu-item index="2-1">发布文章</el-menu-item>
+        <el-menu-item index="/articleadd">发布文章</el-menu-item>
         <el-menu-item index="/article">文章列表</el-menu-item>
         <el-menu-item index="2-3">评论列表</el-menu-item>
-        <el-menu-item index="2-4">素材管理</el-menu-item>
+        <el-menu-item index="/material">素材管理</el-menu-item>
       </el-submenu>
       <el-menu-item index="3" :style="{width:isCollapse?'65px':'200px'}">
         <i class="el-icon-location"></i>
         <span slot="title">粉丝管理</span>
       </el-menu-item>
-      <el-menu-item index="4" :style="{width:isCollapse?'65px':'200px'}">
+      <el-menu-item index="/account" :style="{width:isCollapse?'65px':'200px'}">
         <i class="el-icon-location"></i>
         <span slot="title">账户管理</span>
       </el-menu-item>
@@ -68,24 +68,49 @@
   </el-container>
 </template>
 <script>
+import bus from '@/utils/bus.js'
 export default {
   name: 'Home',
   // 计算属性
   computed: {
     // 获得账户名称
     name: function () {
-      return JSON.parse(window.sessionStorage.getItem('userinfo')).name
+      return this.tmpname || JSON.parse(window.sessionStorage.getItem('userinfo')).name
     },
     // 获得账户头像
     photo: function () {
-      return JSON.parse(window.sessionStorage.getItem('userinfo')).photo
+      return this.tmpphoto || JSON.parse(window.sessionStorage.getItem('userinfo')).photo
     }
   },
   data () {
     return {
+      // 名称临时成员用来解决响应
+      tmpname: '',
+      // 头像临时成员
+      tmpphoto: '',
       // 为false就展开,为true就折叠
       isCollapse: true
     }
+  },
+  created () {
+    // 总共更新两个 名称和头像
+    // 1更新名称
+    bus.$on('upAccountName', nm => {
+      // 更新sessionStorage中name的信息
+      let userinfo = JSON.parse(window.sessionStorage.getItem('userinfo'))
+      userinfo.name = nm
+      this.tmpname = nm
+      window.sessionStorage.setItem('userinfo', JSON.stringify(userinfo))
+    })
+    // 更新头像
+    bus.$on('upAccountPhoto', ph => {
+    // 更新sessionStorage中photo的信息
+      let userinfo = JSON.parse(window.sessionStorage.getItem('userinfo'))
+      userinfo.photo = ph
+      window.sessionStorage.setItem('userinfo', JSON.stringify(userinfo))
+      // 更新临时成员tmpphoto
+      this.tmpphoto = ph
+    })
   },
   methods: {
     logout () {

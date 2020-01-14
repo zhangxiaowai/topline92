@@ -2,7 +2,7 @@
 <template>
   <div class="login-container">
       <div class="login-box">
-          <el-form ref="loginFormRef" :model="loginForm" :rules="loginFormRules">
+          <el-form ref="loginFormRef" :model="loginForm" :rules="loginFormRules" status-icon>
               <img src="./logo_index.png" >
           <el-form-item prop="mobile">
             <el-input v-model="loginForm.mobile" placeholder="请输入手机号码">   <i slot="prefix" class="iconfont icon-iconfontshouji"></i></el-input>
@@ -32,9 +32,11 @@ export default {
     var xieyiTest = function (rule, value, callback) {
       value ? callback() : callback(new Error('请无条件遵守规矩'))
     }
+
     return {
       ctaObj: null,
       isActive: false,
+
       loginForm: {
 
         mobile: '',
@@ -160,7 +162,7 @@ export default {
         justify-content: center;
         align-items: center;
         .el-form{
-            width: 75%;
+            width: 70%;
             text-align: center;
             img{
                 width: 60%;
